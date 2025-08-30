@@ -162,6 +162,15 @@ export const removeImageBackground = async (req, res) => {
     const image  = req.file;
     const plan = req.plan;
 
+    // Check if file was uploaded
+    if (!image) {
+      console.log("No file uploaded");
+      return res.json({
+        success: false,
+        message: "No image file uploaded. Please select an image file.",
+      });
+    }
+
     if (plan !== "premium") {
       return res.json({
         success: false,
@@ -169,6 +178,7 @@ export const removeImageBackground = async (req, res) => {
       });
     }
 
+    console.log("Uploading to Cloudinary:", image.path);
     const { secure_url } = await cloudinary.uploader.upload(image.path, {
       transformation: [
         {
@@ -183,7 +193,7 @@ export const removeImageBackground = async (req, res) => {
     await sql` INSERT INTO creations (user_id,prompt, content,type)
     VALUES (${userId}, 'remove backround from image' , ${secure_url} , 'image' ) `;
 
-    res.json({ success: true, conent: secure_url });
+    res.json({ success: true, content: secure_url });
   } catch (error) {
     console.log("Error in removeImageBackground Controller: ", error.message);
     res.json({ success: false, message: error.message });
@@ -194,8 +204,17 @@ export const removeImageObject = async (req, res) => {
   try {
     const { userId } = req.auth();
     const { object } = req.body;
-    const { image } = req.file;
+    const image = req.file;
     const plan = req.plan;
+
+    // Check if file was uploaded
+    if (!image) {
+      console.log("No file uploaded");
+      return res.json({
+        success: false,
+        message: "No image file uploaded. Please select an image file.",
+      });
+    }
 
     if (plan !== "premium") {
       return res.json({
@@ -204,21 +223,27 @@ export const removeImageObject = async (req, res) => {
       });
     }
 
-    const { public_id } = await cloudinary.uploader.upload(image.path);
+    console.log("Uploading to Cloudinary:", image.path);
 
-    const imageUrl = cloudinary.url(public_id, {
-      transformation: [{ effect: `gen_remove: ${object}` }],
-      resource_type: "image",
+    // Upload with object removal transformation
+    const { secure_url } = await cloudinary.uploader.upload(image.path, {
+      transformation: [
+        {
+          effect: `gen_remove:${object}`,
+        },
+      ],
     });
 
-    console.log("Image uploaded to Cloudinary:", imageUrl);
+    console.log("Image uploaded to Cloudinary:", secure_url);
 
-    await sql` INSERT INTO creations (user_id,prompt, content,type)
-    VALUES (${userId}, ${`Removed ${object} from image`} , ${imageUrl} , 'image' ) `;
+    await sql`
+      INSERT INTO creations (user_id, prompt, content, type)
+      VALUES (${userId}, ${`Removed ${object} from image`}, ${secure_url}, 'image')
+    `;
 
-    res.json({ success: true, conent: imageUrl });
+    res.json({ success: true, content: secure_url });
   } catch (error) {
-    console.log("Error in removeImageObject Controller: ", error.message);
+    console.log("Error in removeImageObject Controller:", error.message);
     res.json({ success: false, message: error.message });
   }
 };
@@ -232,39 +257,54 @@ export const resumeReview = async (req, res) => {
     if (plan !== "premium") {
       return res.json({
         success: false,
-        message: "This Feature is only available for premium subscriptions",
+        message: "This feature is only available for premium subscriptions",
+      });
+    }
+
+    if (!resume) {
+      console.log("No file uploaded");
+      return res.json({
+        success: false,
+        message: "No resume file uploaded. Please select a PDF file.",
       });
     }
 
     if (resume.size > 5 * 1024 * 1024) {
-      return res.json({ message: "Resume file size exceeds allowed size(5MB" });
+      return res.json({
+        success: false,
+        message: "Resume file size exceeds allowed size (5MB)",
+      });
     }
 
-    const dataBuffer = fs.readFileSync(resume.path)
-    const pdfData = await pdf(dataBuffer)
-  
-    const prompt = `Review the following resume and provoide constructive feedback on its strengths, weaknesses, and areas for improvemnet. Reusme Content:\n\n${pdfData.text}`
+    // Use resume.buffer if Multer is in memory mode, otherwise resume.path
+    const dataBuffer = resume.buffer
+      ? resume.buffer
+      : fs.readFileSync(resume.path);
+
+    const pdfData = await pdf(dataBuffer);
+
+    const prompt = `Review the following resume and provide constructive feedback on its strengths, weaknesses, and areas for improvement:\n\n${pdfData.text}`;
 
     const response = await AI.chat.completions.create({
       model: "gemini-2.0-flash",
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
+      messages: [{ role: "user", content: prompt }],
       temperature: 0.7,
       max_tokens: 1000,
     });
 
-    const content = response.choices[0].message.content;
+    const content =
+      response.choices?.[0]?.message?.content?.[0]?.text ||
+      response.choices?.[0]?.message?.content ||
+      "No response generated.";
 
-    await sql` INSERT INTO creations (user_id,prompt, content,type)
-    VALUES (${userId}, 'Review the uploaded resume' , ${content} , 'resume-review' ) `;
+    await sql`
+      INSERT INTO creations (user_id, prompt, content, type)
+      VALUES (${userId}, 'Review the uploaded resume', ${content}, 'resume-review')
+    `;
 
-    res.json({ success: true, conent: content });
+    res.json({ success: true, content });
   } catch (error) {
-    console.log("Error in resumeReview Controller: ", error.message);
+    console.error("Error in resumeReview Controller:", error);
     res.json({ success: false, message: error.message });
   }
 };
