@@ -6,7 +6,7 @@ const Footer = () => {
     <footer className="px-6 md:px-16 lg:px-24 xl:px-32 pt-8 w-full text-gray-500">
       <div className="flex flex-col md:flex-row justify-between w-full gap-10 border-b border-gray-500/30 pb-6">
         <div className="md:max-w-96">
-          <div className="pl-5">
+          <div>
             <p className="flex items-center gap-2.5">
               <ShipWheel className="size-9 text-primary" />
               <span className="text-3xl font-bold font-mono bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent tracking-wide">
@@ -16,9 +16,17 @@ const Footer = () => {
           </div>
           <p className="mt-6 text-sm">
             Experience the power of AI with TexoraAi <br />
-            ITlransform your content creation with our suite of premium AI
+            Transform your content creation with our suite of premium AI
             tools. Write articles, generate images, and enhance your workflow.
           </p>
+          <div className="py-6 text-lg font-medium text-gray-500">
+            Made with
+            <span className="text-pink-500 animate-pulse px-1">💕</span>
+            by
+            <span className="ml-1 bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent font-semibold">
+              Navneet Singh
+            </span>
+          </div>
         </div>
         <div className="flex-1 flex items-start md:justify-end gap-20">
           <div>
@@ -62,8 +70,8 @@ const Footer = () => {
         </div>
       </div>
       <p className="pt-4 text-center text-xs md:text-sm pb-5">
-        Copyright 2025 © <a href="https://prebuiltui.com">TexoraAi</a>. All
-        Right Reserved.
+        Copyright 2025 © <a href="">TexoraAi</a>. All
+        Rights Reserved.
       </p>
     </footer>
   );
