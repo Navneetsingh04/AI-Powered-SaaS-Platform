@@ -15,9 +15,17 @@ await connectCloudinary()
 
 // Middlewares
 
-app.use(cors());
 app.use(express.json());
 app.use(clerkMiddleware());
+app.use(
+  cors({
+    origin: process.env.NODE_ENV === "production" 
+      ? process.env.CORS_ORIGIN 
+      : "http://localhost:5173",
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 
 app.get("/", (req, res) => {
   res.send("Server is Running");
