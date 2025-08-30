@@ -153,7 +153,7 @@ export const generateImage = async (req, res) => {
       publish ?? false
     }) `;
 
-    res.json({ success: true, conent: secure_url });
+    res.json({ success: true, content: secure_url });
   } catch (error) {
     console.log("Error in generateImage Controller: ", error.message);
     res.status(500).json({ success: false, message: error.message });
