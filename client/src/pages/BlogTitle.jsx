@@ -1,14 +1,53 @@
 import { Hash, Sparkles } from "lucide-react";
 import React, { useState } from "react";
+import axiosInstace from "../lib/axios.js";
+import toast from "react-hot-toast";
+import Markdown from "react-markdown";
+import { useAuth } from "@clerk/clerk-react";
 
 const BlogTitle = () => {
-  const blogCategories = ["Genearl", "technology", "Business","Health","LifeStyle","Education","Travle","Food"];
+  const blogCategories = [
+    "Genearl",
+    "technology",
+    "Business",
+    "Health",
+    "LifeStyle",
+    "Education",
+    "Travle",
+    "Food",
+  ];
 
   const [selectedCategories, setSelectedCategories] = useState("Genearl");
   const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [content, setContent] = useState("");
+
+  const { getToken } = useAuth();
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
+    try {
+      setLoading(true);
+      const prompt = `Generate a blog title for thee keyword ${input} in the category ${selectedCategories}`;
+
+      const { data } = await axiosInstace.post(
+        "/api/ai/generate-blog-title",
+        { prompt },
+        {
+          headers: { Authorization: `Bearer ${await getToken()}` },
+        }
+      );
+
+      if (data.success) {
+        setContent(data.content);
+      } else {
+        toast.error(data.error);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <div className="h-full overflow-y-scroll p-6  flex items-start flex-wrap gap-4 text-slate-700">
@@ -47,9 +86,21 @@ const BlogTitle = () => {
           ))}
         </div>
         <br />
-        <button className="w-full flex justify-center items-center gap-2 bg-gradient-to-r from-[#C341F5] to-[#8E37EB] text-white px-4 py-2 mt-6 text-sm rounded-lg cursor-pointer">
-          <Hash className="size-5" />
-          Generate Title
+        <button
+          disabled={loading}
+          className="w-full flex justify-center items-center gap-2 bg-gradient-to-r from-[#C341F5] to-[#8E37EB] text-white px-4 py-2 mt-6 text-sm rounded-lg cursor-pointer"
+        >
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              Generating Title...
+            </span>
+          ) : (
+            <span className="flex items-center gap-2">
+              <Hash className="size-5" />
+              Generate Title
+            </span>
+          )}
         </button>
       </form>
 
@@ -60,12 +111,20 @@ const BlogTitle = () => {
           <Hash className="size-5 text-[#8E37EB]" />
           <h1 className="text-xl font-semibold">Generated Titles</h1>
         </div>
-        <div className="flex-1 flex justify-center items-center">
-          <div className="text-sm flex flex-col items-center gap-5 text-gray-400">
-            <Hash className="size-9" />
-            <p>Enter a topic and click "Generate Title" to get started</p>
+        {!content ? (
+          <div className="flex-1 flex justify-center items-center">
+            <div className="text-sm flex flex-col items-center gap-5 text-gray-400">
+              <Hash className="size-9" />
+              <p>Enter a topic and click "Generate Title" to get started</p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="mt-3 h-full overflow-y-scroll text-sm text-slate-600">
+            <div className="reset-tw">
+              <Markdown>{content}</Markdown>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
