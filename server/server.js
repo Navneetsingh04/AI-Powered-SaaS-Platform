@@ -7,6 +7,7 @@ dotenv.config();
 
 // Routes
 import aiRouter from "./routes/ai.routes.js";
+import userRouter from "./routes/user.routes.js";
 import connectCloudinary from "./config/Cloudinary.js";
 
 const app = express();
@@ -24,6 +25,7 @@ app.get("/", (req, res) => {
 
 app.use(requireAuth());
 app.use('/api/ai', aiRouter);
+app.use('/api/user',userRouter)
 
 const PORT = process.env.PORT || 3000;
 
