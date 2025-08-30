@@ -41,7 +41,7 @@ const GenerateImage = () => {
       if (data.success) {
         setContent(data.content);
       } else {
-        toast.error(data.error);
+        toast.error(data.message || data.error || "An error occurred");
       }
     } catch (error) {
       toast.error(error.message);
