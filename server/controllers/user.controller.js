@@ -6,21 +6,25 @@ export const getUserCreations = async (req, res) => {
 
     const creation =
       await sql`SELECT * FROM creations WHERE user_id = ${userId} ORDER BY created_at DESC`;
-    return res.json({ sucess: true, creation });
+    return res.json({ success: true, creation });
   } catch (error) {
-    console.log("Error in getUserCreations controllers: ", error.message);
-    return res.json({ sucess: false, message: error.message });
+    console.log("Error in getUserCreations controller:", error.message);
+    return res.json({ success: false, message: error.message });
   }
 };
 
 export const getPublishedCreations = async (req, res) => {
   try {
-    const creation =
-      await sql`SELECT * FROM creations WHERE user_id = publish = true ORDER BY created_at DESC`;
-    return res.json({ sucess: true, creation });
+    const { userId } = req.auth();
+    const creation = await sql`
+      SELECT * FROM creations
+      WHERE user_id = ${userId} AND publish = true
+      ORDER BY created_at DESC
+    `;
+    return res.json({ success: true, creation });
   } catch (error) {
-    console.log("Error in getPublishedCreations controllers: ", error.message);
-    return res.json({ sucess: false, message: error.message });
+    console.log("Error in getPublishedCreations controller:", error.message);
+    return res.json({ success: false, message: error.message });
   }
 };
 
@@ -32,28 +36,31 @@ export const toggleLikeCreations = async (req, res) => {
     const [creation] = await sql`SELECT * FROM creations WHERE id = ${id}`;
 
     if (!creation) {
-      return res.json({ sucess: false, message: "Creations not found" });
+      return res.json({ success: false, message: "Creation not found" });
     }
 
-    const currentLikes = creation.likes;
+    const currentLikes = creation.likes || [];
     const userIdStr = userId.toString();
     let updatedLikes;
     let message;
 
     if (currentLikes.includes(userIdStr)) {
-      updatedLikes = creations.filter((user) => user !== userIdStr);
+      // Unlike
+      updatedLikes = currentLikes.filter((user) => user !== userIdStr);
       message = "Creation unliked";
     } else {
+      // Like
       updatedLikes = [...currentLikes, userIdStr];
-      message = "Creation Liked";
+      message = "Creation liked";
     }
-    
-    const fromattedArray = `{${updatedLikes.json(',')}}`
 
-    await sql`UPDATE creations WHERE SET likes = ${fromattedArray}::text[] WHERE id = ${id}`;
-    return res.json({ sucess: true, message });
+    const formattedArray = `{${updatedLikes.join(",")}}`;
+
+    await sql`UPDATE creations SET likes = ${formattedArray}::text[] WHERE id = ${id}`;
+
+    return res.json({ success: true, message, likes: updatedLikes });
   } catch (error) {
-    console.log("Error in toggleLikeCreations controllers: ", error.message);
-    return res.json({ sucess: false, message: error.message });
+    console.log("Error in toggleLikeCreations controller:", error.message);
+    return res.json({ success: false, message: error.message });
   }
 };
