@@ -27,9 +27,7 @@ export const generateArticle = async (req, res) => {
     const free_usage = req.free_usage;
 
     if (plan !== "premium" && free_usage >= 10) {
-      return res
-        .status(403)
-        .json({ message: "Limit Reached. Upgrade to premium to continue." });
+      return res.json({ message: "Limit Reached. Upgrade to premium to continue." });
     }
 
     console.log("called Gemini API with prompt:", prompt);
@@ -61,7 +59,7 @@ export const generateArticle = async (req, res) => {
     res.json({ success: true, content });
   } catch (error) {
     console.log("Error in generateArticle controllers: ", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.json({ success: false, message: error.message });
   }
 };
 
@@ -73,9 +71,7 @@ export const generateBlogTitle = async (req, res) => {
     const free_usage = req.free_usage;
 
     if (plan !== "premium" && free_usage >= 10) {
-      return res
-        .status(403)
-        .json({ message: "Limit Reached. Upgrade to premium to continue." });
+      return res.json({ message: "Limit Reached. Upgrade to premium to continue." });
     }
 
     console.log("called Gemini API with prompt:", prompt);
@@ -107,7 +103,7 @@ export const generateBlogTitle = async (req, res) => {
     res.json({ success: true, content });
   } catch (error) {
     console.log("Error in generateBlogTitle Controller: ", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.json({ success: false, message: error.message });
   }
 };
 
@@ -120,7 +116,7 @@ export const generateImage = async (req, res) => {
     console.log("Request body:", { prompt, publish });
 
     if (plan !== "premium") {
-      return res.status(402).json({
+      return res.json({
         success: false,
         message: "This Feature is only available for premium subscriptions",
       });
@@ -156,18 +152,18 @@ export const generateImage = async (req, res) => {
     res.json({ success: true, content: secure_url });
   } catch (error) {
     console.log("Error in generateImage Controller: ", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.json({ success: false, message: error.message });
   }
 };
 
 export const removeImageBackground = async (req, res) => {
   try {
     const { userId } = req.auth();
-    const { image } = req.file;
+    const image  = req.file;
     const plan = req.plan;
 
     if (plan !== "premium") {
-      return res.status(402).json({
+      return res.json({
         success: false,
         message: "This Feature is only available for premium subscriptions",
       });
@@ -190,7 +186,7 @@ export const removeImageBackground = async (req, res) => {
     res.json({ success: true, conent: secure_url });
   } catch (error) {
     console.log("Error in removeImageBackground Controller: ", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.json({ success: false, message: error.message });
   }
 };
 
@@ -202,7 +198,7 @@ export const removeImageObject = async (req, res) => {
     const plan = req.plan;
 
     if (plan !== "premium") {
-      return res.status(402).json({
+      return res.json({
         success: false,
         message: "This Feature is only available for premium subscriptions",
       });
@@ -223,7 +219,7 @@ export const removeImageObject = async (req, res) => {
     res.json({ success: true, conent: imageUrl });
   } catch (error) {
     console.log("Error in removeImageObject Controller: ", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.json({ success: false, message: error.message });
   }
 };
 
@@ -234,16 +230,14 @@ export const resumeReview = async (req, res) => {
     const plan = req.plan;
 
     if (plan !== "premium") {
-      return res.status(402).json({
+      return res.json({
         success: false,
         message: "This Feature is only available for premium subscriptions",
       });
     }
 
     if (resume.size > 5 * 1024 * 1024) {
-      return res
-        .status(400)
-        .json({ message: "Resume file size exceeds allowed size(5MB" });
+      return res.json({ message: "Resume file size exceeds allowed size(5MB" });
     }
 
     const dataBuffer = fs.readFileSync(resume.path)
@@ -271,6 +265,6 @@ export const resumeReview = async (req, res) => {
     res.json({ success: true, conent: content });
   } catch (error) {
     console.log("Error in resumeReview Controller: ", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.json({ success: false, message: error.message });
   }
 };
