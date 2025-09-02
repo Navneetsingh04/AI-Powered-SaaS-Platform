@@ -26,20 +26,9 @@ TexoraAI is a comprehensive AI-powered SaaS platform that provides a suite of po
 
 ## 🖼️ Screenshots
 
-
-### Landing Page
-![Landing Page](./client/public/screenshots/Landing_page.png)
-
-### AI Tools Dashboard
-*Showcase of the main AI tools interface*
-
-![AI Tools](./client/public/screenshots/Ai_tools.png)
-
-### Image Generation
-*Example of AI-generated images with different styles*
-
-![AI Tools](./client/public/screenshots/Image_Generation.png)
-
+| Landing Page | AI Tools Dashboard | Image Generation|
+|-----------|----------------|-----------------|
+| ![Landing Page](./client/public/screenshots/Landing_page.png) | ![AI Tools](./client/public/screenshots/Ai_tools.png)| ![Image Generation](./client/public/screenshots/Image_Generation.png) |
 
 
 ## 🛠️ Tech Stack
