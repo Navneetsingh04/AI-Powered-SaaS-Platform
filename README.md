@@ -1,4 +1,4 @@
-# 🚀 TexoraAI - Full Stack AI SaaS Platform
+# 🚀 TexoraAI - AI-Powered-SaaS-Platform
 
 
 **Transform your content creation with cutting-edge AI technology**
